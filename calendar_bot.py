@@ -38,6 +38,7 @@ def start(message):
     btn2 = types.InlineKeyboardButton(text="Посмотреть события", callback_data="Посмотреть события")
     btn3 = types.InlineKeyboardButton(text="Удалить событие", callback_data="Удалить событие")
     btn4 = types.InlineKeyboardButton(text="Удалить пользователя", callback_data="Удалить пользователя")
+    keyboard1.add(btn1, btn2, btn3, btn4)
     greeting = "Привет! Я бот - календарь, который поможет тебе не забыть о своих планах"
     bot.send_message(message.chat.id, greeting, reply_markup=keyboard1)
     People[message.chat.id] = Person(message.chat.id, [])  ## регистрация автоматическая при старте
@@ -53,6 +54,11 @@ def check_callback_from_start(callback):
         delete_ivent(callback.message)
     elif callback.data == "Удалить пользователя":
         delete_person(callback.message)
+    elif callback.data == "Да":
+        del People[callback.message.chat.id]
+        bot.send_message(callback.message.chat.id, 'Ваш аккаунт был удалён. Для повторной регистрации введите /start')
+    elif callback.data == "Нет":
+        bot.send_message(callback.message.chat.id, 'Ваш аккаунт был удалён. Шучу)')
 
 
 @bot.message_handler(commands=['delete_ivent'])
@@ -78,14 +84,6 @@ def delete_person(message):
     keyboard2.add(button1, button2)
     bot.send_message(message.chat.id, "Вы уверены, что хотите удалить аккаунт?", reply_markup=keyboard2)
 
-
-@bot.callback_query_handler(func=lambda callback: callback.data)
-def check_callback_from_delete_person(callback):
-    if callback.data == "Да":
-        del People[callback.message.chat.id]
-        bot.send_message(callback.message.chat.id, 'Ваш аккаунт был удалён. Для повторной регистрации введите /start')
-    elif callback.data == "Нет":
-        bot.send_message(callback.message.chat.id, 'Ваш аккаунт был удалён. Шучу)')
 
 
 @bot.message_handler(commands=['add_ivent'])
@@ -139,7 +137,9 @@ def show_ivents(message):
 
 @bot.message_handler(func=lambda message: True)  ## обработка обычного текста
 def get_user_text(message):
-    bot.send_message(message.chat.id, "Список доступных комманд:")
+    bot.send_message(message.chat.id, "Список доступных комманд: \n /start - регистрация пользователя \n"
+                                      "/add_ivent - добавить событие \n /show_ivents - вывести список событий \n"
+                                      "/delete_ivents - удалить событие \n /delete_person - удалить пользователя")
 
 
 bot.enable_save_next_step_handlers(delay=2)
