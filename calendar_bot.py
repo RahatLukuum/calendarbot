@@ -40,9 +40,11 @@ def start(message):
     btn4 = types.InlineKeyboardButton(text="Удалить пользователя", callback_data="Удалить пользователя")
     keyboard1.add(btn1, btn2, btn3, btn4)
     greeting = "Привет! Я бот - календарь, который поможет тебе не забыть о своих планах"
-    bot.send_message(message.chat.id, greeting, reply_markup=keyboard1)
-    People[message.chat.id] = Person(message.chat.id, [])  ## регистрация автоматическая при старте
-
+    if (message.chat.id not in People):
+        bot.send_message(message.chat.id, greeting, reply_markup=keyboard1)
+        People[message.chat.id] = Person(message.chat.id, [])  ## регистрация автоматическая при старте
+    else:
+        bot.send_message(message.chat.id, 'Чего желаете?', reply_markup=keyboard1)
 
 @bot.callback_query_handler(func=lambda callback: callback.data)
 def check_callback_from_start(callback):
@@ -65,8 +67,9 @@ def check_callback_from_start(callback):
 def delete_ivent(message):
     if message.chat.id in People:
         show_ivents(message)
-        sent = bot.send_message(message.chat.id, "Введите одно число: номер события, которое хотите удалить.")
-        bot.register_next_step_handler(sent, deliting_ivent)
+        if len(People[message.chat.id].ivents) != 0:
+            sent = bot.send_message(message.chat.id, "Введите одно число: номер события, которое хотите удалить.")
+            bot.register_next_step_handler(sent, deliting_ivent)
     else:
         bot.send_message(message.chat.id, "Ваш аккаунт не зарегестрирован, для регистрации введите /start")
 
